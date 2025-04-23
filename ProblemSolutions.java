@@ -1,6 +1,6 @@
 /******************************************************************
  *
- *   ADD YOUR NAME / SECTION NUMBER HERE
+ *   Joshua Kao / COMP 272
  *
  *   This java file contains the problem solutions of canFinish and
  *   numGroups methods.
@@ -72,18 +72,44 @@ class ProblemSolutions {
      * @return boolean          - True if all exams can be taken, else false.
      */
 
-    public boolean canFinish(int numExams, 
-                             int[][] prerequisites) {
-      
+    public boolean canFinish(int numExams, int[][] prerequisites) {
+
         int numNodes = numExams;  // # of nodes in graph
 
         // Build directed graph's adjacency list
-        ArrayList<Integer>[] adj = getAdjList(numExams, 
-                                        prerequisites); 
+        ArrayList<Integer>[] adj = getAdjList(numExams, prerequisites); 
 
-        // ADD YOUR CODE HERE - ADD YOUR NAME / SECTION AT TOP OF FILE
-        return false;
+        // Compute in-degrees for each node.
+        int[] indegree = new int[numNodes];
+        for (int i = 0; i < numNodes; i++) {
+            for (int neighbor : adj[i]) {
+                indegree[neighbor]++;
+            }
+        }
 
+        // Initialize a queue with all nodes that have zero in-degree.
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < numNodes; i++) {
+            if (indegree[i] == 0) {
+                queue.add(i);
+            }
+        }
+
+        // Process nodes with zero in-degree.
+        int count = 0;
+        while (!queue.isEmpty()) {
+            int node = queue.poll();
+            count++;
+            for (int neighbor : adj[node]) {
+                indegree[neighbor]--;
+                if (indegree[neighbor] == 0) {
+                    queue.add(neighbor);
+                }
+            }
+        }
+
+        // If all nodes were processed, then there is no cycle
+        return count == numNodes;
     }
 
 
@@ -190,9 +216,34 @@ class ProblemSolutions {
             }
         }
 
-        // YOUR CODE GOES HERE - you can add helper methods, you do not need
-        // to put all code in this method.
-        return -1;
+        int groups = 0;
+        boolean[] visited = new boolean[numNodes];
+
+        // Iterate over every node (0 to numNodes - 1)
+        for (i = 0; i < numNodes; i++) {
+            if (!visited[i]) {
+                groups++;  // Found a new group (or isolated node)
+                // Use an iterative DFS to mark all connected nodes
+                Stack<Integer> stack = new Stack<>();
+                stack.push(i);
+
+                while (!stack.isEmpty()) {
+                    int current = stack.pop();
+                    if (!visited[current]) {
+                        visited[current] = true;
+                        // Only explore neighbors if the current node has connections in the map
+                        if (graph.containsKey(current)) {
+                            for (Integer neighbor : graph.get(current)) {
+                                if (!visited[neighbor]) {
+                                    stack.push(neighbor);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return groups;
     }
 
 }
